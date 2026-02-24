@@ -1,8 +1,8 @@
-package com.yuriolivs.notification_scheduler.domain.notification.notification.dto;
+package com.yuriolivs.notification_scheduler.domain.notification.dto;
 
-import com.yuriolivs.notification_scheduler.domain.notification.notification.enums.NotificationChannel;
-import com.yuriolivs.notification_scheduler.domain.notification.notification.enums.NotificationPriority;
-import com.yuriolivs.notification_scheduler.domain.notification.notification.enums.NotificationType;
+import com.yuriolivs.notification.shared.domain.notification.enums.NotificationChannel;
+import com.yuriolivs.notification.shared.domain.notification.enums.NotificationPriority;
+import com.yuriolivs.notification.shared.domain.notification.enums.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
