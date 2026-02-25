@@ -1,8 +1,10 @@
 package com.yuriolivs.notification_scheduler.service;
 
+import com.yuriolivs.notification.shared.domain.notification.dto.NotificationResponseDTO;
 import com.yuriolivs.notification.shared.exceptions.http.HttpNotFoundException;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
+import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
 import com.yuriolivs.notification_scheduler.domain.schedule.interfaces.SchedulerServiceInterface;
 import com.yuriolivs.notification_scheduler.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,9 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Autowired
     private final ScheduleRepository repo;
 
+    @Autowired
+    private final NotificationClient client;
+
     @Override
     public ScheduledNotification checkScheduleStatus(UUID id) {
         Optional<ScheduledNotification> existing = repo.findById(id);
@@ -30,12 +35,25 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Override
     public ScheduledNotification scheduleMessage(ScheduleRequestDTO dto) {
-        return null;
-    }
+        Optional<ScheduledNotification> existing = repo.findByIdempotencyKey(dto.idempotencyKey());
+        if (existing.isPresent())
+            return existing.get();
 
-    @Override
-    public void searchScheduledMessages() {
+        NotificationResponseDTO savedNotification = client
+                .save(dto.notification());
 
+        ScheduledNotification scheduledNotification = new ScheduledNotification(
+                dto.idempotencyKey(),
+                savedNotification.id(),
+                savedNotification.recipient(),
+                savedNotification.channel(),
+                true,
+                ScheduleStatus.SCHEDULED,
+                dto.date(),
+                dto.time()
+        );
+
+        return repo.save(scheduledNotification);
     }
 
     @Override

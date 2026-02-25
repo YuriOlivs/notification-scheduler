@@ -12,4 +12,5 @@ public interface ScheduleRepository extends JpaRepository<ScheduledNotification,
     Optional<ScheduledNotification> findById(UUID id);
     List<ScheduledNotification> findAll();
     List<ScheduledNotification> findAllByDate(LocalDate date);
+    Optional<ScheduledNotification> findByIdempotencyKey(String idempotencyKey);
 }
