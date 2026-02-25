@@ -30,6 +30,8 @@ public class ScheduledNotification {
     @Column(nullable = false)
     private UUID notificationId;
 
+    private Boolean isActive;
+
     private LocalDate date;
 
     private Time time;
