@@ -7,8 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Time;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -42,9 +41,7 @@ public class ScheduledNotification {
 
     private ScheduleStatus status;
 
-    private LocalDate date;
-
-    private Time time;
+    private LocalDateTime scheduledAt;
 
     public ScheduledNotification(
             String idempotencyKey,
@@ -53,8 +50,7 @@ public class ScheduledNotification {
             NotificationChannel channel,
             Boolean isActive,
             ScheduleStatus status,
-            LocalDate date,
-            Time time
+            LocalDateTime scheduledAt
     ) {
         this.idempotencyKey = idempotencyKey;
         this.notificationId = notificationId;
@@ -62,7 +58,6 @@ public class ScheduledNotification {
         this.channel = channel;
         this.isActive = isActive;
         this.status = status;
-        this.date = date;
-        this.time = time;
+        this.scheduledAt = scheduledAt;
     }
 }

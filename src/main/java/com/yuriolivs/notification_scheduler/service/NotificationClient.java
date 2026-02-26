@@ -1,7 +1,8 @@
 package com.yuriolivs.notification_scheduler.service;
 
 import com.yuriolivs.notification.shared.domain.notification.dto.NotificationResponseDTO;
-import com.yuriolivs.notification.shared.domain.notification.enums.NotificationChannel;
+import com.yuriolivs.notification.shared.domain.schedule.dto.SchedulePayloadRequestDTO;
+import com.yuriolivs.notification.shared.domain.schedule.dto.ScheduledPayloadResponseDTO;
 import com.yuriolivs.notification_scheduler.domain.notification.dto.NotificationRequestDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,16 @@ public class NotificationClient {
 
     public NotificationResponseDTO save(NotificationRequestDTO dto) {
         return restTemplate.postForObject(
-                "http://localhost:8080/notifications",
+                "http://localhost:8080/notifications/internal",
                 dto,
                 NotificationResponseDTO.class
+        );
+    }
+
+    public ScheduledPayloadResponseDTO getNotificationPayload(SchedulePayloadRequestDTO dto) {
+        return restTemplate.getForObject(
+                "http://localhost:8080/notifications/internal/payload",
+                ScheduledPayloadResponseDTO.class
         );
     }
 }

@@ -1,6 +1,11 @@
 package com.yuriolivs.notification_scheduler.service;
 
+import com.yuriolivs.notification.shared.domain.notification.NotificationMessage;
 import com.yuriolivs.notification.shared.domain.notification.dto.NotificationResponseDTO;
+import com.yuriolivs.notification.shared.domain.notification.enums.NotificationPriority;
+import com.yuriolivs.notification.shared.domain.schedule.dto.SchedulePayloadDTO;
+import com.yuriolivs.notification.shared.domain.schedule.dto.SchedulePayloadRequestDTO;
+import com.yuriolivs.notification.shared.domain.schedule.dto.ScheduledPayloadResponseDTO;
 import com.yuriolivs.notification.shared.exceptions.http.HttpNotFoundException;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
@@ -10,11 +15,12 @@ import com.yuriolivs.notification_scheduler.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +30,8 @@ public class SchedulerService implements SchedulerServiceInterface {
 
     @Autowired
     private final NotificationClient client;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public ScheduledNotification checkScheduleStatus(UUID id) {
@@ -49,8 +57,7 @@ public class SchedulerService implements SchedulerServiceInterface {
                 savedNotification.channel(),
                 true,
                 ScheduleStatus.SCHEDULED,
-                dto.date(),
-                dto.time()
+                dto.dateTime()
         );
 
         return repo.save(scheduledNotification);
@@ -64,6 +71,47 @@ public class SchedulerService implements SchedulerServiceInterface {
     @Override
     public List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDate date) {
         return repo.findAllByDate(date);
+    }
+
+    public List<NotificationMessage> findNotificationsToBeProcessed(
+            LocalDateTime startOfDay,
+            LocalDateTime now
+    ) {
+        List<NotificationMessage> notificationsToBeSent = new ArrayList<>();
+
+        List<ScheduledNotification> scheduledNotifications = repo
+                .findByStatusAndIsActiveTrueAndScheduledAtBetween(
+                        ScheduleStatus.SCHEDULED,
+                        startOfDay,
+                        now
+                );
+
+        List<UUID> ids = scheduledNotifications
+                .stream()
+                .map(ScheduledNotification::getNotificationId)
+                .toList();
+
+        SchedulePayloadRequestDTO request = new SchedulePayloadRequestDTO(ids);
+
+        ScheduledPayloadResponseDTO response = client.getNotificationPayload(request);
+
+        for (SchedulePayloadDTO payload : response.list()) {
+            Map<String, String> map = objectMapper.readValue(
+                    payload.payload(),
+                    new TypeReference<Map<String, String>>() {}
+            );
+
+            NotificationMessage send = new NotificationMessage(
+                    payload.id(),
+                    NotificationPriority.SCHEDULED,
+                    map,
+                    payload.channel()
+            );
+
+            notificationsToBeSent.add(send);
+        }
+
+        return notificationsToBeSent;
     }
 
     @Override
