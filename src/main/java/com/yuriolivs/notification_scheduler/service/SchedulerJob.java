@@ -18,10 +18,9 @@ import java.util.List;
 public class SchedulerJob {
     @Autowired private final SchedulerService service;
     @Autowired private final NotificationPublisher publisher;
-    private final Integer DELAY = 10000;
     private static final Logger log = LoggerFactory.getLogger(SchedulerJob.class);
 
-    @Scheduled(fixedDelay = DELAY)
+    @Scheduled(fixedDelay = 10000)
     public void execute() {
         long startTime = System.currentTimeMillis();
 

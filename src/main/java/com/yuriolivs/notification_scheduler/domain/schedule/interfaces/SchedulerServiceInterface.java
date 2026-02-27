@@ -5,6 +5,7 @@ import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleResponse
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,6 +13,6 @@ public interface SchedulerServiceInterface {
     ScheduledNotification checkScheduleStatus(UUID id);
     ScheduledNotification scheduleMessage(ScheduleRequestDTO dto);
     List<ScheduledNotification> findAllScheduledMessages();
-    List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDate date);
+    List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDateTime date);
     ScheduledNotification cancelSchedule(UUID id);
 }

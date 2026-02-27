@@ -69,8 +69,8 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDate date) {
-        return repo.findAllByDate(date);
+    public List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDateTime date) {
+        return repo.findAllByScheduledAt(date);
     }
 
     public List<NotificationMessage> findNotificationsToBeProcessed(

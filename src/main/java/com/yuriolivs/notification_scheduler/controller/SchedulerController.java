@@ -5,6 +5,7 @@ import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleResponse
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
 import com.yuriolivs.notification_scheduler.service.SchedulerService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,9 +17,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/schedule")
+@RequiredArgsConstructor
 public class SchedulerController {
     @Autowired
-    private SchedulerService service;
+    private final SchedulerService service;
 
     private ResponseEntity<ScheduleResponseDTO> checkScheduleStatus(
             @RequestParam UUID id
