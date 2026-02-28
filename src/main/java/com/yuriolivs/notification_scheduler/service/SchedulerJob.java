@@ -49,13 +49,18 @@ public class SchedulerJob {
                     }
                 }
             }
+
+            if (notifications.isEmpty()) {
+                log.info("No messages found to be processed.");
+            }
         } catch (Exception ex) {
             log.error("Unexpected error during Scheduler job execution.");
+            throw ex;
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("==================================================");
+            log.info("✅ SCHEDULER JOB FINISHED | Duration = {} ms", duration);
+            log.info("==================================================");
         }
-
-        long duration = System.currentTimeMillis() - startTime;
-        log.info("==================================================");
-        log.info("✅ SCHEDULER JOB FINISHED | Duration = {} ms", duration);
-        log.info("==================================================");
     }
 }
