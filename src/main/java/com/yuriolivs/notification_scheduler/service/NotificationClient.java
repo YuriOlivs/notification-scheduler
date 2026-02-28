@@ -33,8 +33,9 @@ public class NotificationClient {
     }
 
     public ScheduledPayloadResponseDTO getNotificationPayload(SchedulePayloadRequestDTO dto) {
-        return restTemplate.getForObject(
+        return restTemplate.postForObject(
                 "http://localhost:8080/notifications/internal/payload",
+                dto,
                 ScheduledPayloadResponseDTO.class
         );
     }
