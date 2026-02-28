@@ -3,6 +3,7 @@ package com.yuriolivs.notification_scheduler.domain.schedule.interfaces;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleResponseDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
+import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.UUID;
 public interface SchedulerServiceInterface {
     ScheduledNotification checkScheduleStatus(UUID id);
     ScheduledNotification scheduleMessage(ScheduleRequestDTO dto);
+    ScheduledNotification updateStatus(ScheduleStatus status, UUID notificationId);
     List<ScheduledNotification> findAllScheduledMessages();
     List<ScheduledNotification> findAllScheduledMessagesByDate(LocalDateTime date);
     ScheduledNotification cancelSchedule(UUID id);

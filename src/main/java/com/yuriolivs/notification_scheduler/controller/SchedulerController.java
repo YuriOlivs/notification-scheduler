@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -22,28 +19,32 @@ public class SchedulerController {
     @Autowired
     private final SchedulerService service;
 
-    private ResponseEntity<ScheduleResponseDTO> checkScheduleStatus(
-            @RequestParam UUID id
+    @GetMapping("/status/{id}")
+    public ResponseEntity<ScheduleResponseDTO> checkScheduleStatus(
+            @PathVariable UUID id
     ) {
         ScheduledNotification response = service.checkScheduleStatus(id);
         return ResponseEntity.ok(ScheduleResponseDTO.from(response));
     }
 
-    private ResponseEntity<ScheduleResponseDTO> scheduleMessage(
+    @PostMapping
+    public ResponseEntity<ScheduleResponseDTO> scheduleMessage(
             @RequestBody @Valid ScheduleRequestDTO dto
             ) {
         ScheduledNotification response = service.scheduleMessage(dto);
         return ResponseEntity.ok(ScheduleResponseDTO.from(response));
     }
 
-    private ResponseEntity<ScheduleResponseDTO> cancelSchedule(
-            @RequestParam UUID id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ScheduleResponseDTO> cancelSchedule(
+            @PathVariable UUID id
     ) {
         ScheduledNotification response = service.cancelSchedule(id);
         return ResponseEntity.ok(ScheduleResponseDTO.from(response));
     }
 
-    private ResponseEntity<ScheduleResponseDTO> returnAllScheduledMessages() {
+    @GetMapping
+    public ResponseEntity<ScheduleResponseDTO> returnAllScheduledMessages() {
         return ResponseEntity.ok().build();
     }
 }

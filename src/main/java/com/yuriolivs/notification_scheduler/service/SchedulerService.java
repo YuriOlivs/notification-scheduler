@@ -6,6 +6,7 @@ import com.yuriolivs.notification.shared.domain.notification.enums.NotificationP
 import com.yuriolivs.notification.shared.domain.schedule.dto.SchedulePayloadDTO;
 import com.yuriolivs.notification.shared.domain.schedule.dto.SchedulePayloadRequestDTO;
 import com.yuriolivs.notification.shared.domain.schedule.dto.ScheduledPayloadResponseDTO;
+import com.yuriolivs.notification.shared.exceptions.http.HttpBadRequestException;
 import com.yuriolivs.notification.shared.exceptions.http.HttpNotFoundException;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
@@ -13,8 +14,10 @@ import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus
 import com.yuriolivs.notification_scheduler.domain.schedule.interfaces.SchedulerServiceInterface;
 import com.yuriolivs.notification_scheduler.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -47,20 +50,35 @@ public class SchedulerService implements SchedulerServiceInterface {
         if (existing.isPresent())
             return existing.get();
 
-        NotificationResponseDTO savedNotification = client
-                .save(dto.notification());
+        try {
+            NotificationResponseDTO savedNotification = client
+                    .save(dto.notification());
 
-        ScheduledNotification scheduledNotification = new ScheduledNotification(
-                dto.idempotencyKey(),
-                savedNotification.id(),
-                savedNotification.recipient(),
-                savedNotification.channel(),
-                true,
-                ScheduleStatus.SCHEDULED,
-                dto.dateTime()
-        );
+            ScheduledNotification scheduledNotification = new ScheduledNotification(
+                    dto.idempotencyKey(),
+                    savedNotification.id(),
+                    savedNotification.recipient(),
+                    savedNotification.channel(),
+                    true,
+                    ScheduleStatus.SCHEDULED,
+                    dto.dateTime()
+            );
 
-        return repo.save(scheduledNotification);
+            return repo.save(scheduledNotification);
+        } catch (HttpClientErrorException.BadRequest ex) {
+            throw new HttpBadRequestException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public ScheduledNotification updateStatus(ScheduleStatus status, UUID notificationId) {
+        Optional<ScheduledNotification> notificationFound = repo.findByNotificationId(notificationId);
+        if (notificationFound.isEmpty()) throw new HttpBadRequestException("Scheduled Notification not found.");
+
+        ScheduledNotification notification = notificationFound.get();
+        notification.setStatus(status);
+
+        return repo.save(notification);
     }
 
     @Override
@@ -77,6 +95,9 @@ public class SchedulerService implements SchedulerServiceInterface {
             LocalDateTime startOfDay,
             LocalDateTime now
     ) {
+        System.out.println(startOfDay);
+        System.out.println(now);
+
         List<NotificationMessage> notificationsToBeSent = new ArrayList<>();
 
         List<ScheduledNotification> scheduledNotifications = repo
@@ -86,30 +107,33 @@ public class SchedulerService implements SchedulerServiceInterface {
                         now
                 );
 
+        if (scheduledNotifications.isEmpty()) return notificationsToBeSent;
+
         List<UUID> ids = scheduledNotifications
                 .stream()
                 .map(ScheduledNotification::getNotificationId)
                 .toList();
 
         SchedulePayloadRequestDTO request = new SchedulePayloadRequestDTO(ids);
-
         ScheduledPayloadResponseDTO response = client.getNotificationPayload(request);
 
         for (SchedulePayloadDTO payload : response.list()) {
-            Map<String, String> map = objectMapper.readValue(
-                    payload.payload(),
-                    new TypeReference<Map<String, String>>() {}
-            );
+            //Map<String, String> map = objectMapper.readValue(
+            //        payload.payload(),
+            //        new TypeReference<Map<String, String>>() {}
+            //);
 
             NotificationMessage send = new NotificationMessage(
                     payload.id(),
                     NotificationPriority.SCHEDULED,
-                    map,
+                    payload.payload(),
                     payload.channel()
             );
 
             notificationsToBeSent.add(send);
         }
+
+        this.updateStatusBatch(ScheduleStatus.PROCESSING, scheduledNotifications);
 
         return notificationsToBeSent;
     }
@@ -122,5 +146,15 @@ public class SchedulerService implements SchedulerServiceInterface {
         ScheduledNotification notification = existing.get();
         notification.setIsActive(false);
         return repo.save(notification);
+    }
+
+    public void updateStatusBatch(ScheduleStatus status, List<ScheduledNotification> notifications) {
+        if (notifications.isEmpty()) return;
+
+        for (ScheduledNotification notification : notifications) {
+            notification.setStatus(status);
+        }
+
+        repo.saveAll(notifications);
     }
 }

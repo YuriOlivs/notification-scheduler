@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import java.util.UUID;
                 )
         }
 )
+@ToString
 public class ScheduledNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
