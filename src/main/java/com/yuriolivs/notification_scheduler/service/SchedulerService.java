@@ -14,14 +14,11 @@ import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus
 import com.yuriolivs.notification_scheduler.domain.schedule.interfaces.SchedulerServiceInterface;
 import com.yuriolivs.notification_scheduler.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,7 +34,7 @@ public class SchedulerService implements SchedulerServiceInterface {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public ScheduledNotification checkScheduleStatus(UUID id) {
+    public ScheduledNotification findScheduledNotification(UUID id) {
         Optional<ScheduledNotification> existing = repo.findById(id);
         if (existing.isEmpty()) throw new HttpNotFoundException("Schedule not found.");
 
@@ -91,6 +88,7 @@ public class SchedulerService implements SchedulerServiceInterface {
         return repo.findAllByScheduledAt(date);
     }
 
+    @Override
     public List<NotificationMessage> findNotificationsToBeProcessed(
             LocalDateTime startOfDay,
             LocalDateTime now
@@ -118,11 +116,6 @@ public class SchedulerService implements SchedulerServiceInterface {
         ScheduledPayloadResponseDTO response = client.getNotificationPayload(request);
 
         for (SchedulePayloadDTO payload : response.list()) {
-            //Map<String, String> map = objectMapper.readValue(
-            //        payload.payload(),
-            //        new TypeReference<Map<String, String>>() {}
-            //);
-
             NotificationMessage send = new NotificationMessage(
                     payload.id(),
                     NotificationPriority.SCHEDULED,
@@ -139,12 +132,15 @@ public class SchedulerService implements SchedulerServiceInterface {
     }
 
     @Override
-    public ScheduledNotification cancelSchedule(UUID id) {
-        Optional<ScheduledNotification> existing = repo.findById(id);
-        if (existing.isEmpty()) throw new HttpNotFoundException("Schedule not found.");
+    public ScheduledNotification save(ScheduledNotification notification) {
+        return repo.save(notification);
+    }
 
-        ScheduledNotification notification = existing.get();
+    @Override
+    public ScheduledNotification cancelSchedule(UUID id) {
+        ScheduledNotification notification = this.findScheduledNotification(id);
         notification.setIsActive(false);
+
         return repo.save(notification);
     }
 
@@ -157,4 +153,5 @@ public class SchedulerService implements SchedulerServiceInterface {
 
         repo.saveAll(notifications);
     }
+
 }

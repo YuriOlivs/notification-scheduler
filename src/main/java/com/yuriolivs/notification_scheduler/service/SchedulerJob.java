@@ -3,8 +3,7 @@ package com.yuriolivs.notification_scheduler.service;
 import com.yuriolivs.notification.shared.domain.notification.NotificationMessage;
 import com.yuriolivs.notification_scheduler.messaging.producer.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,12 +12,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SchedulerJob {
     @Autowired private final SchedulerService service;
     @Autowired private final NotificationPublisher publisher;
-    private static final Logger log = LoggerFactory.getLogger(SchedulerJob.class);
 
     @Scheduled(fixedDelay = 10000)
     public void execute() {

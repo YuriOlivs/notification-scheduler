@@ -23,7 +23,7 @@ public class SchedulerController {
     public ResponseEntity<ScheduleResponseDTO> checkScheduleStatus(
             @PathVariable UUID id
     ) {
-        ScheduledNotification response = service.checkScheduleStatus(id);
+        ScheduledNotification response = service.findScheduledNotification(id);
         return ResponseEntity.ok(ScheduleResponseDTO.from(response));
     }
 
