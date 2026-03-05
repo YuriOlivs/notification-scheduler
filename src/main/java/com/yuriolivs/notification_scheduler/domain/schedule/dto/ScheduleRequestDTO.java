@@ -8,12 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record ScheduleRequestDTO(
-        @NotBlank
+        @NotBlank(message = "Idempotency Key must be filled.")
         String idempotencyKey,
 
-        @NotNull
+        @NotNull(message = "Notification field must be filled with the notification body.")
         NotificationRequestDTO notification,
 
-        @Future
+        @Future(message = "Date to be scheduled must be a future date.")
         LocalDateTime dateTime
 ) {}

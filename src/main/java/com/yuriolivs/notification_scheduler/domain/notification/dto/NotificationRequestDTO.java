@@ -9,12 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 public record NotificationRequestDTO(
-    @NotBlank
+    @NotBlank(message = "Idempotency Key must be filled.")
     String idempotencyKey,
 
+    @NotBlank(message = "Channel must be filled.")
     NotificationChannel channel,
 
-    @NotBlank
+    @NotBlank(message = "Recipient must be filled.")
     String recipient,
 
     NotificationType type,
@@ -23,7 +24,7 @@ public record NotificationRequestDTO(
 
     NotificationPriority priority,
 
-    @NotNull
+    @NotNull(message = "Payload must not be null.")
     Map<String, String> payload
 ) {
 }
