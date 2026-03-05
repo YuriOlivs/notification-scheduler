@@ -20,18 +20,34 @@ public class NotificationResultConsumer {
 
     @RabbitListener(queues = RabbitMqConfig.RESULT_QUEUE)
     public void consume(NotificationResult result) {
+        log.info("==================================================");
+        log.info("⚙️ STARTED CONSUMER: {} | ScheduleID: {}",
+                RabbitMqConfig.RESULT_QUEUE, result.getScheduleId());
+        log.info("==================================================");
+
         try {
+            log.info("Received message from {}.", RabbitMqConfig.RESULT_QUEUE);
+
             ScheduledNotification notification = service.findScheduledNotification(result.getScheduleId());
 
             if (result.success()) {
+                log.info("Schedule {} was successful.", result.getScheduleId());
                 notification.setStatus(ScheduleStatus.EXECUTED);
             } else {
+                log.info("Schedule failed.");
                 notification.setStatus(ScheduleStatus.FAILED);
             }
 
+            log.info("Updating database...");
             service.save(notification);
         } catch (HttpNotFoundException ex) {
             log.error("Notification was not found in database.", ex);
+            throw ex;
+        } finally {
+            log.info("==================================================");
+            log.info("⚙️ ENDED CONSUMER: {} | ScheduleID: {}",
+                    RabbitMqConfig.RESULT_QUEUE, result.getScheduleId());
+            log.info("==================================================");
         }
     }
 }

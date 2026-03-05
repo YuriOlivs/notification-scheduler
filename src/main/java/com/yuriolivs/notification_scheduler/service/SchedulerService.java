@@ -116,11 +116,19 @@ public class SchedulerService implements SchedulerServiceInterface {
         ScheduledPayloadResponseDTO response = client.getNotificationPayload(request);
 
         for (SchedulePayloadDTO payload : response.list()) {
+            UUID scheduleId = scheduledNotifications
+                    .stream()
+                    .map(ScheduledNotification::getNotificationId)
+                    .filter(notificationId -> notificationId.equals(payload.id()))
+                    .findFirst()
+                    .orElse(null);
+
             NotificationMessage send = new NotificationMessage(
                     payload.id(),
                     NotificationPriority.SCHEDULED,
                     payload.payload(),
-                    payload.channel()
+                    payload.channel(),
+                    scheduleId
             );
 
             notificationsToBeSent.add(send);
@@ -149,6 +157,10 @@ public class SchedulerService implements SchedulerServiceInterface {
 
         for (ScheduledNotification notification : notifications) {
             notification.setStatus(status);
+
+            if (!status.equals(ScheduleStatus.SCHEDULED)) {
+                notification.setIsActive(false);
+            }
         }
 
         repo.saveAll(notifications);
