@@ -116,9 +116,10 @@ public class SchedulerService implements SchedulerServiceInterface {
         ScheduledPayloadResponseDTO response = client.getNotificationPayload(request);
 
         for (SchedulePayloadDTO payload : response.list()) {
+
             UUID scheduleId = scheduledNotifications
                     .stream()
-                    .map(ScheduledNotification::getNotificationId)
+                    .map(ScheduledNotification::getId)
                     .filter(notificationId -> notificationId.equals(payload.id()))
                     .findFirst()
                     .orElse(null);
