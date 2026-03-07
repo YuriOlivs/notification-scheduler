@@ -4,7 +4,7 @@ import com.yuriolivs.notification.shared.domain.notification.NotificationResult;
 import com.yuriolivs.notification.shared.exceptions.http.HttpNotFoundException;
 import com.yuriolivs.notification_scheduler.config.RabbitMqConfig;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
-import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
+import com.yuriolivs.notification.shared.domain.schedule.enums.ScheduleStatus;
 import com.yuriolivs.notification_scheduler.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +29,9 @@ public class NotificationResultConsumer {
             log.info("Received message from {}.", RabbitMqConfig.RESULT_QUEUE);
 
             ScheduledNotification notification = service.findScheduledNotification(result.getScheduleId());
+            notification.setStatus(result.getStatus());
 
-            if (result.success()) {
-                log.info("Schedule {} was successful.", result.getScheduleId());
-                notification.setStatus(ScheduleStatus.EXECUTED);
-            } else {
-                log.info("Schedule failed.");
-                notification.setStatus(ScheduleStatus.FAILED);
-            }
+            log.info("Message status: {}", result.getStatus());
 
             log.info("Updating database...");
             service.save(notification);

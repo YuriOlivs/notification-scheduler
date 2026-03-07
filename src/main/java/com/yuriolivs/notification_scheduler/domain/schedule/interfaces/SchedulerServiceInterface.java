@@ -3,7 +3,7 @@ package com.yuriolivs.notification_scheduler.domain.schedule.interfaces;
 import com.yuriolivs.notification.shared.domain.notification.NotificationMessage;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
-import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
+import com.yuriolivs.notification.shared.domain.schedule.enums.ScheduleStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -10,7 +10,7 @@ import com.yuriolivs.notification.shared.exceptions.http.HttpBadRequestException
 import com.yuriolivs.notification.shared.exceptions.http.HttpNotFoundException;
 import com.yuriolivs.notification_scheduler.domain.schedule.dto.ScheduleRequestDTO;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
-import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
+import com.yuriolivs.notification.shared.domain.schedule.enums.ScheduleStatus;
 import com.yuriolivs.notification_scheduler.domain.schedule.interfaces.SchedulerServiceInterface;
 import com.yuriolivs.notification_scheduler.repository.ScheduleRepository;
 import lombok.AllArgsConstructor;
@@ -119,8 +119,8 @@ public class SchedulerService implements SchedulerServiceInterface {
 
             UUID scheduleId = scheduledNotifications
                     .stream()
+                    .filter(notification -> notification.getNotificationId().equals(payload.id()))
                     .map(ScheduledNotification::getId)
-                    .filter(notificationId -> notificationId.equals(payload.id()))
                     .findFirst()
                     .orElse(null);
 

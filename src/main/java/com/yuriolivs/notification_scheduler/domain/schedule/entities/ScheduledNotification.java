@@ -1,7 +1,7 @@
 package com.yuriolivs.notification_scheduler.domain.schedule.entities;
 
 import com.yuriolivs.notification.shared.domain.notification.enums.NotificationChannel;
-import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
+import com.yuriolivs.notification.shared.domain.schedule.enums.ScheduleStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,10 +37,12 @@ public class ScheduledNotification {
 
     private String recipient;
 
+    @Enumerated(EnumType.STRING)
     private NotificationChannel channel;
 
     private Boolean isActive;
 
+    @Enumerated(EnumType.STRING)
     private ScheduleStatus status;
 
     private LocalDateTime scheduledAt;

@@ -2,7 +2,7 @@ package com.yuriolivs.notification_scheduler.domain.schedule.dto;
 
 import com.yuriolivs.notification.shared.domain.notification.enums.NotificationChannel;
 import com.yuriolivs.notification_scheduler.domain.schedule.entities.ScheduledNotification;
-import com.yuriolivs.notification_scheduler.domain.schedule.enums.ScheduleStatus;
+import com.yuriolivs.notification.shared.domain.schedule.enums.ScheduleStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
